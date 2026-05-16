@@ -7,56 +7,40 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
-    container:
-      image: kivy/buildozer:latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Extract ZIP
         run: |
-          unzip -o DroidBlox-main.zip
-          rm -rf DroidBlox-main/.github
-          mv DroidBlox-main/* .
+          unzip DroidBlox-main.zip
+          cp -r DroidBlox-main/* .
+          rm -rf DroidBlox-main
 
-      - name: Patch config
-        run: |
-          sed -i 's/^android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec || true
-          echo "android.archs = armeabi-v7a" >> buildozer.spec
-          echo "android.api = 31" >> buildozer.spec
-          echo "android.minapi = 21" >> buildozer.spec
-          echo "android.ndk = 23b" >> buildozer.spec
-          echo "android.accept_sdk_license = True" >> buildozer.spec
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: Install system libs
+      - name: Install system deps
         run: |
-          apt-get update
-          apt-get install -y \
-            libcairo2-dev \
-            pkg-config \
-            python3-dev \
-            libffi-dev \
-            libssl-dev \
-            libjpeg-dev \
-            zlib1g-dev \
-            libgirepository1.0-dev \
-            gir1.2-gtk-3.0
+          sudo apt update
+          sudo apt install -y zip unzip openjdk-17-jdk python3-pip build-essential libffi-dev libssl-dev libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev pkg-config libcairo2-dev
 
       - name: Install requirements
         run: |
-          pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade pip setuptools wheel
           pip install "cython<3"
+          sed -i '/^kivy/d' requirements.txt
+          sed -i '/^Kivy/d' requirements.txt
+          pip install "kivy==2.2.1" "kivymd==1.1.1" pycairo buildozer
           pip install -r requirements.txt
 
       - name: Build APK
         run: |
-          yes | buildozer android debug
+          buildozer android debug
 
       - name: Upload APK
-        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: DroidBlox-build-output
-          path: |
-            bin/*.apk
-            .buildozer/**/*.log
+          name: DroidBlox-APK
+          path: bin/*.apk
