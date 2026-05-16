@@ -21,16 +21,18 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
-      - name: Accept licenses
-        run: yes | sdkmanager --licenses
+      - name: Accept licenses + install SDK
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;37.0.0"
 
       - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Extract project
+      - name: Extract ZIP
         run: unzip -o DroidBlox-main.zip
 
-      - name: Build APK
+      - name: Build
         run: |
           cd DroidBlox-main
           pip install --upgrade pip
