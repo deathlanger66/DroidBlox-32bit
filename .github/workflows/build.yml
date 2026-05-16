@@ -28,6 +28,20 @@ jobs:
           echo "android.ndk = 23b" >> buildozer.spec
           echo "android.accept_sdk_license = True" >> buildozer.spec
 
+      - name: Install system libs
+        run: |
+          apt-get update
+          apt-get install -y \
+            libcairo2-dev \
+            pkg-config \
+            python3-dev \
+            libffi-dev \
+            libssl-dev \
+            libjpeg-dev \
+            zlib1g-dev \
+            libgirepository1.0-dev \
+            gir1.2-gtk-3.0
+
       - name: Install requirements
         run: |
           pip install --upgrade pip setuptools wheel
