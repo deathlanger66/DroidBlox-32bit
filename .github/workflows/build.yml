@@ -12,39 +12,33 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - uses: android-actions/setup-android@v3
 
       - name: Accept licenses
         run: yes | sdkmanager --licenses
 
-      - name: Install SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-
       - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Extract ZIP
-        run: unzip DroidBlox-main.zip
-
-      - name: Enter folder + install deps
-        run: |
-          cd DroidBlox-main
-          pip install --upgrade pip
-          pip install buildozer cython
+      - name: Extract project
+        run: unzip -o DroidBlox-main.zip
 
       - name: Build APK
         run: |
           cd DroidBlox-main
+          pip install --upgrade pip
+          pip install buildozer cython
           buildozer android debug
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: apk
           path: DroidBlox-main/bin/*.apk
