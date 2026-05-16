@@ -1,0 +1,39 @@
+name: Build DroidBlox 32bit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Extract ZIP
+        run: |
+          unzip DroidBlox-main.zip
+          mv DroidBlox-main/* .
+          ls
+
+      - name: Force 32-bit
+        run: |
+          sed -i 's/android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec
+
+      - name: Install deps
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip openjdk-17-jdk zip unzip git
+          pip install buildozer cython
+          pip install -r requirements.txt
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DroidBlox-32bit
+          path: bin/*.apk
