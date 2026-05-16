@@ -15,6 +15,7 @@ jobs:
           rm -rf DroidBlox-main
           unzip -o DroidBlox-main.zip
           shopt -s dotglob
+          rm -rf DroidBlox-main/.github
           mv DroidBlox-main/* .
           ls -la
 
