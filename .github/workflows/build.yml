@@ -24,7 +24,23 @@ jobs:
       - name: Install deps
         run: |
           sudo apt update
-          sudo apt install -y python3-pip openjdk-17-jdk zip unzip git
+          sudo apt install -y \
+            python3-pip \
+            python3-dev \
+            openjdk-17-jdk \
+            zip unzip git \
+            build-essential \
+            pkg-config \
+            libcairo2-dev \
+            libgirepository1.0-dev \
+            gir1.2-gtk-3.0 \
+            libffi-dev \
+            libssl-dev \
+            libsqlite3-dev \
+            zlib1g-dev \
+            libjpeg-dev
+
+          pip install --upgrade pip
           pip install buildozer cython
           pip install -r requirements.txt
 
