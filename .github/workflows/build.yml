@@ -28,13 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install buildozer cython==0.29.36
 
-      - name: Enter project folder
-        run: cd DroidBlox-main && ls
+      - name: List files
+        run: ls -la
 
       - name: Build APK
-        run: cd DroidBlox-main && buildozer android debug
+        run: buildozer android debug
 
       - uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: DroidBlox-main/bin/*.apk
+          path: bin/*.apk
