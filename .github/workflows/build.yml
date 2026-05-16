@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
@@ -20,21 +20,22 @@ jobs:
           mv DroidBlox-main/* .
           ls
 
-      - name: Force 32-bit + SDK config
+      - name: Patch buildozer
         run: |
           sed -i 's/android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec
-          echo "" >> buildozer.spec
-          echo "android.accept_sdk_license = True" >> buildozer.spec
+          sed -i 's/android.accept_sdk_license = .*/android.accept_sdk_license = True/' buildozer.spec || true
           echo "android.skip_update = True" >> buildozer.spec
           echo "android.sdk_path = /usr/local/lib/android/sdk" >> buildozer.spec
-          echo "android.ndk_api = 21" >> buildozer.spec
+          echo "android.ndk_path = /usr/local/lib/android/sdk/ndk" >> buildozer.spec
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y \
-            python3-pip python3-dev openjdk-17-jdk \
-            zip unzip git build-essential pkg-config \
+            python3-pip python3-dev \
+            openjdk-17-jdk \
+            zip unzip git \
+            build-essential pkg-config \
             libcairo2-dev libgirepository1.0-dev gir1.2-gtk-3.0 \
             libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
 
@@ -42,9 +43,14 @@ jobs:
           pip install buildozer cython
           pip install -r requirements.txt
 
+      - name: Install Android SDK tools
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;37.0.0"
+
       - name: Build APK
         run: |
-          buildozer android debug
+          buildozer android debug --skip-sdk-update
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
