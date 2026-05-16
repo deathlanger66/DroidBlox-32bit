@@ -17,14 +17,10 @@ jobs:
           shopt -s dotglob
           rm -rf DroidBlox-main/.github
           mv DroidBlox-main/* .
-          ls -la
 
       - name: Patch buildozer
         run: |
           sed -i 's/^android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec || true
-          sed -i 's/^android.api = .*/android.api = 31/' buildozer.spec || true
-          sed -i 's/^android.minapi = .*/android.minapi = 21/' buildozer.spec || true
-          sed -i 's/^android.ndk = .*/android.ndk = 23b/' buildozer.spec || true
           echo "" >> buildozer.spec
           echo "android.archs = armeabi-v7a" >> buildozer.spec
           echo "android.api = 31" >> buildozer.spec
@@ -38,7 +34,7 @@ jobs:
           sudo apt install -y \
             python3-pip python3-dev \
             openjdk-17-jdk \
-            zip unzip git \
+            zip unzip git wget \
             build-essential pkg-config autoconf automake libtool \
             libcairo2-dev libgirepository1.0-dev gir1.2-gtk-3.0 \
             libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
@@ -47,11 +43,20 @@ jobs:
           pip install "cython<3" buildozer
           pip install -r requirements.txt
 
+      - name: Force NDK 23b
+        run: |
+          mkdir -p ~/.buildozer/android/platform
+          cd ~/.buildozer/android/platform
+          wget https://dl.google.com/android/repository/android-ndk-r23b-linux.zip
+          unzip android-ndk-r23b-linux.zip
+
       - name: Clean old build
         run: |
           rm -rf .buildozer bin
 
       - name: Build APK
+        env:
+          ANDROIDNDK: /home/runner/.buildozer/android/platform/android-ndk-r23b
         run: |
           yes | buildozer -v android debug
 
