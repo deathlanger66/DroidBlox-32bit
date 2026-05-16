@@ -17,13 +17,11 @@ jobs:
         run: |
           unzip -o DroidBlox-main.zip
           rm -rf DroidBlox-main/.github
-          shopt -s dotglob
           mv DroidBlox-main/* .
 
       - name: Patch config
         run: |
           sed -i 's/^android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec || true
-          echo "" >> buildozer.spec
           echo "android.archs = armeabi-v7a" >> buildozer.spec
           echo "android.api = 31" >> buildozer.spec
           echo "android.minapi = 21" >> buildozer.spec
