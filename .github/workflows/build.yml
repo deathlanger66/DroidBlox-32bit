@@ -12,18 +12,24 @@ jobs:
 
       - name: Extract ZIP
         run: |
-          unzip DroidBlox-main.zip
+          rm -rf DroidBlox-main
+          unzip -o DroidBlox-main.zip
+          shopt -s dotglob
           mv DroidBlox-main/* .
+          ls -la
 
       - name: Patch buildozer
         run: |
-          sed -i 's/android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec
-          sed -i 's/android.ndk = .*/android.ndk = 25b/' buildozer.spec || true
-          echo "android.accept_sdk_license = True" >> buildozer.spec
-          echo "android.skip_update = False" >> buildozer.spec
-          echo "android.ndk = 25b" >> buildozer.spec
-          echo "android.api = 33" >> buildozer.spec
+          sed -i 's/^android.archs = .*/android.archs = armeabi-v7a/' buildozer.spec || true
+          sed -i 's/^android.api = .*/android.api = 31/' buildozer.spec || true
+          sed -i 's/^android.minapi = .*/android.minapi = 21/' buildozer.spec || true
+          sed -i 's/^android.ndk = .*/android.ndk = 23b/' buildozer.spec || true
+          echo "" >> buildozer.spec
+          echo "android.archs = armeabi-v7a" >> buildozer.spec
+          echo "android.api = 31" >> buildozer.spec
           echo "android.minapi = 21" >> buildozer.spec
+          echo "android.ndk = 23b" >> buildozer.spec
+          echo "android.accept_sdk_license = True" >> buildozer.spec
 
       - name: Install dependencies
         run: |
@@ -32,20 +38,27 @@ jobs:
             python3-pip python3-dev \
             openjdk-17-jdk \
             zip unzip git \
-            build-essential pkg-config \
+            build-essential pkg-config autoconf automake libtool \
             libcairo2-dev libgirepository1.0-dev gir1.2-gtk-3.0 \
             libffi-dev libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev
 
-          pip install --upgrade pip
-          pip install buildozer cython
+          pip install --upgrade pip setuptools wheel
+          pip install "cython<3" buildozer
           pip install -r requirements.txt
+
+      - name: Clean old build
+        run: |
+          rm -rf .buildozer bin
 
       - name: Build APK
         run: |
-          yes | buildozer android debug
+          yes | buildozer -v android debug
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: DroidBlox-32bit
-          path: bin/*.apk
+          name: DroidBlox-build-output
+          path: |
+            bin/*.apk
+            .buildozer/**/*.log
